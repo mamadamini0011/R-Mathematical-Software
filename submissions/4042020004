@@ -1,0 +1,89 @@
+km <- function(x, k){
+
+  n <- nrow(x)
+
+  centers <- x[sample(1:n, k), ]
+
+  clust0 <- rep(0, n)
+  iter <- 0
+
+  while(TRUE){
+
+    iter <- iter + 1
+
+   
+    dis <- matrix(0, n, k)
+
+    for(i in 1:k){
+
+      dis[,i] <- sqrt((x[,1]-centers[i,1])^2 +
+                      (x[,2]-centers[i,2])^2)
+
+    }
+
+    
+    clust <- apply(dis,1,which.min)
+
+    
+    if(all(clust==clust0))
+      break
+
+    clust0 <- clust
+
+    
+    for(i in 1:k){
+
+      centers[i,] <- colMeans(x[clust==i,,drop=FALSE])
+
+    }
+
+  }
+
+  
+  size <- table(clust)
+
+  
+  clustdata <- vector("list",k)
+
+  for(i in 1:k){
+
+    clustdata[[i]] <- x[clust==i,,drop=FALSE]
+
+  }
+
+  
+  cols <- c("red","green","black","blue","orange",
+            "purple","brown","pink")
+
+  plot(x,
+       col=cols[clust],
+       pch=8,
+       xlab="Latitude",
+       ylab="Longitude",
+       main="Office Location")
+
+  points(centers,
+         pch=15,
+         cex=2,
+         col=cols[1:k])
+
+  for(i in 1:n){
+
+    segments(x[i,1],x[i,2],
+             centers[clust[i],1],
+             centers[clust[i],2],
+             col=cols[clust[i]])
+
+  }
+
+  title(sub=paste("N=",n,", k=",k))
+
+  return(list(
+    centers=centers,
+    size=size,
+    clustdata=clustdata,
+    clust=clust,
+    iteration=iter
+  ))
+
+}
